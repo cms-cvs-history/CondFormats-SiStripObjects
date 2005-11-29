@@ -133,8 +133,8 @@ int main(int csize, char** cline ) {
 		    SiStripPedestals::SiStripPedestalsVector theApvStripVector;
  		    for(int strip=0; strip<128; ++strip){
 		      SiStripPedestals::Item theItem;
-		      theItem.ped      = RandGauss::shoot(MeanPed,RmsPed);
-		      theItem.noise    = RandGauss::shoot(MeanNoise,RmsNoise);
+		      theItem.ped      = (int) RandGauss::shoot(MeanPed,RmsPed);
+		      theItem.noise    = (int) RandGauss::shoot(MeanNoise,RmsNoise);
 		      theItem.disabled = (RandFlat::shoot(1.) < badStripProb ? true:false) ;
 		      //theItem.highTh   = 5;
 		      //theItem.lowTh    = 2;
