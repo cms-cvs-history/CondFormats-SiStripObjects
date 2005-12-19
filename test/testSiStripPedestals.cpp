@@ -29,6 +29,8 @@
 #include<iostream>
 #include<string>
 
+#include<boost/cstdint.hpp>
+
 #include "POOLCore/POOLContext.h"
 #include "SealKernel/Exception.h"
 
@@ -54,8 +56,11 @@ const float RmsNoise  = 1;
 const double badStripProb = .002;
 
 
-unsigned int EncodeValues(int FedId_, int feFPGA_, int channel_, int ApvPair_);
-std::vector<int> DecodeValues( int value);
+unsigned int EncodeApvIdValues(int FedId_, int feFPGA_, int channel_, int ApvPair_);
+std::vector<int> DecodeApvIdValues( int value);
+
+uint32_t EncodeStripData(float ped_, float noise_, float lowTh_, float highTh_, bool disable_);
+
 
 
 int main(int csize, char** cline ) {
@@ -127,31 +132,26 @@ int main(int csize, char** cline ) {
 	      for(int ch=1; ch<=channel_Max; ++ch)
 		for(int apvpair=1;apvpair<=ApvPair_Max;apvpair++)
 		  {	   
-		    unsigned int numschema = EncodeValues(fedid,fefpga,ch,apvpair);
+		    unsigned int numschema = EncodeApvIdValues(fedid,fefpga,ch,apvpair);
 		    std::cout << "numschema " << numschema <<  std::endl;
 
-		    SiStripPedestals::SiStripPedestalsVector theApvStripVector;
+		    SiStripPedestals::SiStripPedestalsVector theSiStripVector;
  		    for(int strip=0; strip<128; ++strip){
 		      SiStripPedestals::Item theItem;
-		      theItem.ped      = (int) RandGauss::shoot(MeanPed,RmsPed);
-		      theItem.noise    = (int) RandGauss::shoot(MeanNoise,RmsNoise);
-		      theItem.disabled = (RandFlat::shoot(1.) < badStripProb ? true:false) ;
-		      //theItem.highTh   = 5;
-		      //theItem.lowTh    = 2;
+		      
+		      std::cout << " strip " << strip << " =\t";
+		      theItem.StripData      = (*ped).EncodeStripData(
+							       RandGauss::shoot(MeanPed,RmsPed),
+							       RandGauss::shoot(MeanNoise,RmsNoise),
+							       2,
+							       5,
+							       (RandFlat::shoot(1.) < badStripProb ? true:false)
+							       );
 		     
-
-		      std::cout << " strip " << strip << " =\t"
-				<< theItem.ped      << " \t" 
-				<< theItem.noise    << " \t" 
-				<< theItem.disabled << " \t" 
-			//<< theItem.lowTh    << " \t" 
-			//<< theItem.highTh   << " \t" 
-				<< std::endl; 
-
-		      theApvStripVector.push_back(theItem);
+		      theSiStripVector.push_back(theItem);
 		    }
 		    
-		    ped->m_pedestals.insert(std::pair<unsigned int, SiStripPedestals::SiStripPedestalsVector > (numschema,theApvStripVector));
+		    ped->m_pedestals.insert(std::pair<unsigned int, SiStripPedestals::SiStripPedestalsVector > (numschema,theSiStripVector));
 		  }	
 	}	
       }
@@ -193,26 +193,36 @@ int main(int csize, char** cline ) {
 	  unsigned int numschema = (*mapit).first;
 	    std::cout << "mappit " <<  numschema << std::endl;
 	  
-	  std::vector<int> values = DecodeValues(numschema);
-	  SiStripPedestals::SiStripPedestalsVector theApvStripVector =  (*mapit).second;
+	  std::vector<int> values = DecodeApvIdValues(numschema);
+	  SiStripPedestals::SiStripPedestalsVector theSiStripVector =  (*mapit).second;
 	  std::cout << "Item for " 
 		    << " FedId_   \t" << values[0]
 		    << " feFPGA_  \t" << values[1]
 		    << " strip_   \t" << values[2]
 		    << " ApvPair_ \t" << values[3]
 		    << " numschema \t"<< numschema << std::endl;
-	  
+
+	  std::vector<int>   v_ped    = (*ped).getPed    (numschema);
+	  std::vector<float> v_noise  = (*ped).getNoise  (numschema);
+	  std::vector<float> v_lowth  = (*ped).getLowTh  (numschema);
+	  std::vector<float> v_highth = (*ped).getHighTh (numschema);
+	  std::vector<bool>  v_disable= (*ped).getDisable(numschema);
+		  
 	  for(int strip=0; strip<128; ++strip){
-	    SiStripPedestals::Item theItem = theApvStripVector[strip];
+	    //SiStripPedestals::Item theItem = theSiStripVector[strip];
 		      
 	    std::cout << " strip " << strip << " =\t"
-		      << theItem.ped      << " \t" 
-		      << theItem.noise    << " \t" 
-		      << theItem.disabled << " \t" 
+		      << v_ped    [strip]      << " \t" 
+		      << v_noise  [strip]      << " \t" 
+		      << v_lowth  [strip]      << " \t" 
+		      << v_highth [strip]      << " \t" 
+		      << v_disable[strip]      << " \t" 
+	      //     << theItem.ped      << " \t" 
+	      //      << theItem.noise    << " \t" 
+	      //      << theItem.disabled << " \t" 
 	      //<< theItem.lowTh    << " \t" 
 	      //<< theItem.highTh   << " \t" 
-		      << std::endl; 
-	    
+		      << std::endl; 	    
 	  } 
 	}
     }//end else
@@ -242,7 +252,7 @@ int main(int csize, char** cline ) {
 
 
 
-unsigned int EncodeValues(int FedId_, int feFPGA_, int channel_, int ApvPair_)
+unsigned int EncodeApvIdValues(int FedId_, int feFPGA_, int channel_, int ApvPair_)
 {
   unsigned int apvpairid=0;
   apvpairid = 
@@ -253,9 +263,30 @@ unsigned int EncodeValues(int FedId_, int feFPGA_, int channel_, int ApvPair_)
   return apvpairid;
 };
 
+// uint32_t EncodeStripData(float ped_, float noise_, float lowTh_, float highTh_, bool disable_)
+// {
+//   // Encoding Algorithm from Fed9UUtils/src/Fed9UDescriptionToXml.cc
+  
+//   uint32_t low   = (static_cast<uint32_t>(lowTh_*5.0 + 0.5)  ) & 0x3F; 
+//   uint32_t high  = (static_cast<uint32_t>(highTh_*5.0 + 0.5) ) & 0x3F;
+//   uint32_t noise =  static_cast<uint32_t>(noise_*10.0 + 0.5)   & 0x01FF;
+//   uint32_t ped   =  static_cast<uint32_t>(ped_)                & 0x03FF;
+  
+//   uint32_t stripData = (ped << 22) | (noise << 13) | (high << 7) | (low << 1) | ( disable_ ? 0x1 : 0x0 );
 
+//   std::cout 
+//     << std::fixed << ped_       << " \t" 
+//     << std::fixed << noise_     << " \t" 
+//     << lowTh_     << " \t" 
+//     << highTh_    << " \t" 
+//     << disable_  << " \t" 
+//     << stripData << " \t" 
+//     << std::endl;
+  
+//   return stripData;
+// };
 
-std::vector<int> DecodeValues(int apvpairid)
+std::vector<int> DecodeApvIdValues(int apvpairid)
 {
   std::vector<int> values;
   values.push_back(1 + (apvpairid >> FedId_StartBit_   ) & FedId_Mask_   ); 

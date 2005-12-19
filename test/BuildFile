@@ -10,4 +10,7 @@
 <use name=CondFormats/DataRecord>
 <use name=FWCore/Services>
 <bin file=testSiStripPedestals.cpp></bin>
+#<library file=stubs/SiStripCalibAnalyzer.cc name=SiStripCalibAnalyzer>
+#        <flags SEAL_PLUGIN_NAME="SiStripCalibAnalyzer">
+#</library>
 </environment>
