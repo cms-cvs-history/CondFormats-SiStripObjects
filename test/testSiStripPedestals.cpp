@@ -135,23 +135,23 @@ int main(int csize, char** cline ) {
 		    unsigned int numschema = EncodeApvIdValues(fedid,fefpga,ch,apvpair);
 		    std::cout << "numschema " << numschema <<  std::endl;
 
-		    SiStripPedestals::SiStripPedestalsVector theSiStripVector;
+		    SiStripPedestalsVector theSiStripVector;
  		    for(int strip=0; strip<128; ++strip){
-		      SiStripPedestals::Item theItem;
+		      SiStripPedestals::SiStripData theSiStripData;
 		      
 		      std::cout << " strip " << strip << " =\t";
-		      theItem.StripData      = (*ped).EncodeStripData(
-							       RandGauss::shoot(MeanPed,RmsPed),
-							       RandGauss::shoot(MeanNoise,RmsNoise),
-							       2,
-							       5,
-							       (RandFlat::shoot(1.) < badStripProb ? true:false)
-							       );
+		      theSiStripData.Data = (*ped).EncodeStripData(
+								   RandGauss::shoot(MeanPed,RmsPed),
+								   RandGauss::shoot(MeanNoise,RmsNoise),
+								   2,
+								   5,
+								   (RandFlat::shoot(1.) < badStripProb ? true:false),
+								   1);
 		     
-		      theSiStripVector.push_back(theItem);
+		      theSiStripVector.push_back(theSiStripData);
 		    }
 		    
-		    ped->m_pedestals.insert(std::pair<unsigned int, SiStripPedestals::SiStripPedestalsVector > (numschema,theSiStripVector));
+		    ped->m_pedestals.insert(std::pair<unsigned int, SiStripPedestalsVector > (numschema,theSiStripVector));
 		  }	
 	}	
       }
@@ -187,41 +187,32 @@ int main(int csize, char** cline ) {
 
       std::cout << "Pedestals for " << std::endl;
 	
-      SiStripPedestals::SiStripPedestalsMapIterator mapit = (*ped).m_pedestals.begin();
+      SiStripPedestalsMapIterator mapit = (*ped).m_pedestals.begin();
       for (;mapit!=(*ped).m_pedestals.end();mapit++)
 	{
 	  unsigned int numschema = (*mapit).first;
 	    std::cout << "mappit " <<  numschema << std::endl;
 	  
 	  std::vector<int> values = DecodeApvIdValues(numschema);
-	  SiStripPedestals::SiStripPedestalsVector theSiStripVector =  (*mapit).second;
-	  std::cout << "Item for " 
+	  SiStripPedestalsVector theSiStripVector =  (*mapit).second;
+	  //const SiStripPedestalsVector theSiStripVector =  (*ped).getSiStripPedestalsVector(numschema);
+	 
+	  std::cout << "SiStripData for " 
 		    << " FedId_   \t" << values[0]
 		    << " feFPGA_  \t" << values[1]
 		    << " strip_   \t" << values[2]
 		    << " ApvPair_ \t" << values[3]
 		    << " numschema \t"<< numschema << std::endl;
 
-	  std::vector<int>   v_ped    = (*ped).getPed    (numschema);
-	  std::vector<float> v_noise  = (*ped).getNoise  (numschema);
-	  std::vector<float> v_lowth  = (*ped).getLowTh  (numschema);
-	  std::vector<float> v_highth = (*ped).getHighTh (numschema);
-	  std::vector<bool>  v_disable= (*ped).getDisable(numschema);
-		  
-	  for(int strip=0; strip<128; ++strip){
-	    //SiStripPedestals::Item theItem = theSiStripVector[strip];
-		      
-	    std::cout << " strip " << strip << " =\t"
-		      << v_ped    [strip]      << " \t" 
-		      << v_noise  [strip]      << " \t" 
-		      << v_lowth  [strip]      << " \t" 
-		      << v_highth [strip]      << " \t" 
-		      << v_disable[strip]      << " \t" 
-	      //     << theItem.ped      << " \t" 
-	      //      << theItem.noise    << " \t" 
-	      //      << theItem.disabled << " \t" 
-	      //<< theItem.lowTh    << " \t" 
-	      //<< theItem.highTh   << " \t" 
+	  int strip=0;
+	  for(SiStripPedestalsVectorIterator iter=theSiStripVector.begin(); iter!=theSiStripVector.end(); iter++){
+	    
+	    std::cout << " strip " << strip++ << " =\t"
+		      << iter->getPed()     << " \t" 
+		      << iter->getNoise()   << " \t" 
+		      << iter->getLowTh()   << " \t" 
+		      << iter->getHighTh()  << " \t" 
+		      << iter->getDisable()<< " \t" 
 		      << std::endl; 	    
 	  } 
 	}
