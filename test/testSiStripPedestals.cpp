@@ -192,11 +192,12 @@ int main(int csize, char** cline ) {
     std::cout<<er.what()<<std::endl;
     delete loader;
     exit(-1);
-  }catch(const seal::Exception& er){
+  }catch(const pool::Exception& er){
     std::cout<<er.what()<<std::endl;
     delete loader;
     exit(-1);
-  }catch(...){
+  }
+  catch(...){
     std::cout<<"Funny error"<<std::endl;
     delete loader;
     exit(-1);
