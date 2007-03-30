@@ -2,6 +2,7 @@
 //
 /**\class CablingUtility CablingUtility.cc CondFormats/SiStripObjects/test/CablingUtility.cc
 
+
  Description: Simple utility to inspect tracker cabling maps.
 
  Implementation:
@@ -11,7 +12,7 @@
 //
 // Original Author:  Christophe DELAERE
 //         Created:  Wed Mar 28 18:01:43 CEST 2007
-// $Id: CablingUtility.cc,v 1.1.2.1 2007/03/29 10:20:39 delaer Exp $
+// $Id: CablingUtility.cc,v 1.2 2007/03/29 10:25:25 delaer Exp $
 //
 //
 
@@ -119,15 +120,15 @@ CablingUtility::beginJob(const edm::EventSetup& setup)
  std::cout << std::endl << std::endl;
 
  while (!std::cin.eof()) {
-  uint32_t detid = 0; 
-  uint32_t fedid = 0;
-  uint32_t fedch = 0;
-  uint32_t feccrate = 0;
-  uint32_t fecslot = 0;
-  uint32_t fecring = 0;
-  uint32_t ccuaddr = 0;
-  uint32_t ccuchan = 0;
-  uint32_t lldchan = 0;
+  int32_t detid = 0; 
+  int32_t fedid = 0;
+  int32_t fedch = 0;
+  int32_t feccrate = 0;
+  int32_t fecslot = 0;
+  int32_t fecring = 0;
+  int32_t ccuaddr = 0;
+  int32_t ccuchan = 0;
+  int32_t lldchan = 0;
   char buffer[256];
   char mode[256];
   std::cin.getline(buffer,256);
@@ -139,28 +140,28 @@ CablingUtility::beginJob(const edm::EventSetup& setup)
   if(strncmp(mode,"DET",3)==0) { theMode = 1; ss >> detid; }
   else if(strncmp(mode,"TOB",3)==0) { 
     theMode = 1; 
-    uint32_t layer, rod_fw_bw, rod, module, ster;
+    int32_t layer, rod_fw_bw, rod, module, ster;
     ss >> layer >> rod_fw_bw >> rod >> module >> ster;
     TOBDetId id(layer, rod_fw_bw, rod, module, ster);
     detid = id.rawId();
   }
   else if(strncmp(mode,"TID",3)==0) { 
     theMode = 1; 
-    uint32_t side, wheel, ring, module_fw_bw, module, ster;
+    int32_t side, wheel, ring, module_fw_bw, module, ster;
     ss >> side >> wheel >> ring >> module_fw_bw >> module >> ster;
     TIDDetId id(side, wheel, ring, module_fw_bw, module, ster);
     detid = id.rawId();
   }
   else if(strncmp(mode,"TIB",3)==0) { 
     theMode = 1;
-    uint32_t layer, str_fw_bw, str_int_ext, str, module, ster;
+    int32_t layer, str_fw_bw, str_int_ext, str, module, ster;
     ss >> layer >> str_fw_bw >> str_int_ext >> str >> module >> ster;
     TIBDetId id(layer, str_fw_bw, str_int_ext, str, module, ster);
     detid = id.rawId();
   }
   else if(strncmp(mode,"TEC",3)==0) { 
     theMode = 1;
-    uint32_t side, wheel, petal_fw_bw, petal, ring, module, ster;
+    int32_t side, wheel, petal_fw_bw, petal, ring, module, ster;
     ss >> side >> wheel >> petal_fw_bw >> petal >> ring >> module >> ster;
     TECDetId id(side, wheel, petal_fw_bw, petal, ring, module, ster);
     detid = id.rawId();
@@ -173,8 +174,8 @@ CablingUtility::beginJob(const edm::EventSetup& setup)
     std::vector<FedChannelConnection>::const_iterator iconn = conns.begin();
     for ( ; iconn != conns.end(); iconn++ ) {
        if((theMode == 1 && iconn->detId()==detid) ||
-          (theMode == 2 && iconn->fedId()==fedid && iconn->fedCh()==fedch) ||
-	  (theMode == 3 && iconn->fecCrate()==feccrate && iconn->fecSlot()==fecslot && iconn->fecRing()==fecring && iconn->ccuAddr()==ccuaddr && iconn->ccuChan()==ccuchan && iconn->lldChannel()==lldchan)  ){
+          (theMode == 2 && (iconn->fedId()==fedid || fedid<0) && (iconn->fedCh()==fedch || fedch<0) ) ||
+	  (theMode == 3 && (iconn->fecCrate()==feccrate || feccrate<0) && (iconn->fecSlot()==fecslot || fecslot<0) && (iconn->fecRing()==fecring || fecring<0) && (iconn->ccuAddr()==ccuaddr || ccuaddr<0) && (iconn->ccuChan()==ccuchan || ccuchan<0) && (iconn->lldChannel()==lldchan || lldchan<0))  ){
 	 std::stringstream ss;
 	 iconn->print(ss);
 	 std::cout << ss.str() << std::endl;
