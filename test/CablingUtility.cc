@@ -12,7 +12,7 @@
 //
 // Original Author:  Christophe DELAERE
 //         Created:  Wed Mar 28 18:01:43 CEST 2007
-// $Id: CablingUtility.cc,v 1.2 2007/03/29 10:25:25 delaer Exp $
+// $Id: CablingUtility.cc,v 1.3 2007/03/30 15:34:24 delaer Exp $
 //
 //
 
@@ -25,11 +25,9 @@
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include <CondFormats/DataRecord/interface/SiStripFedCablingRcd.h>
 #include <CondFormats/SiStripObjects/interface/FedChannelConnection.h>
