@@ -31,9 +31,6 @@ class ApvTimingAnalysis : public CommissioningAnalysis {
   /** Identifies if analysis is valid or not. */
   bool isValid() const;
   
-  /** Identifies if tick mark is found or not. */
-  bool foundTickMark() const;
- 
   /** Time of tick mark rising edge [ns]. */
   inline const float& time() const; 
 
@@ -62,7 +59,7 @@ class ApvTimingAnalysis : public CommissioningAnalysis {
   inline const float& peak() const; 
   
   /** FED frame-finding threshold [ADC] (returns 65535 if invalid). */
-  uint16_t frameFindingThreshold() const; 
+  uint32_t frameFindingThreshold() const; 
   
   // ---------- misc ----------
 
