@@ -1,4 +1,0 @@
-<bin name=TestSiStripLatency file=TestSiStripLatency.cc>
-  <lib name=CondFormatsSiStripObjects>
-</bin>
-
