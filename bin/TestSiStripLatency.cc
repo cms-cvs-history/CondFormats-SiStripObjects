@@ -56,7 +56,11 @@ void test( const vector<DetIdAndApvs> & detIdAndApvs,
     }
   }
   // Finished filling, now compress the ranges
+  vector<SiStripLatency::Latency> latenciesBeforeCompression = latency.allLatencyAndModes();
+  cout << "Ranges before compression = " << latenciesBeforeCompression.size() << endl;
   latency.compress();
+  vector<SiStripLatency::Latency> latenciesAfterCompression = latency.allLatencyAndModes();
+  cout << "Ranges after compression = " << latenciesAfterCompression.size() << endl;
 }
 
 void check( const vector<float> & latencies, const vector<uint16_t> & modes, const vector<DetIdAndApvs> & detIdAndApvs, SiStripLatency & latency )
@@ -108,6 +112,8 @@ int main()
   element1.detId = 100000;
   element1.apvs.push_back(0);
   element1.apvs.push_back(1);
+  element1.apvs.push_back(2);
+  element1.apvs.push_back(3);
   detIdAndApvs.push_back(element1);
 
   DetIdAndApvs element2;
@@ -115,6 +121,9 @@ int main()
   element2.apvs.push_back(0);
   element2.apvs.push_back(1);
   element2.apvs.push_back(2);
+  element2.apvs.push_back(3);
+  element2.apvs.push_back(4);
+  element2.apvs.push_back(5);
   detIdAndApvs.push_back(element2);
 
   DetIdAndApvs element3;
@@ -122,6 +131,9 @@ int main()
   element3.apvs.push_back(0);
   element3.apvs.push_back(1);
   element3.apvs.push_back(2);
+  element3.apvs.push_back(3);
+  element3.apvs.push_back(4);
+  element3.apvs.push_back(5);
   detIdAndApvs.push_back(element3);
 
   DetIdAndApvs element4;
@@ -135,6 +147,9 @@ int main()
   element5.apvs.push_back(0);
   element5.apvs.push_back(1);
   element5.apvs.push_back(2);
+  element5.apvs.push_back(3);
+  element5.apvs.push_back(4);
+  element5.apvs.push_back(5);
   detIdAndApvs.push_back(element5);
 
   cout << "---------------------------------" << endl;
