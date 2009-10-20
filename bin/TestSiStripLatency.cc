@@ -47,7 +47,7 @@ void test( const vector<DetIdAndApvs> & detIdAndApvs,
 
 
       // cout << "For i = " << i << " flip = " << flip << endl;
-      latency.put(detIdAndApv->detId, *apv, 1.3+flip, 37+modeFlip);
+      latency.put(detIdAndApv->detId, *apv, 14+flip, 37+modeFlip);
 
 //       cout << "latency stored is = " << latency.latency(detIdAndApv->detId, *apv) << endl;
       latencies.push_back(latency.latency(detIdAndApv->detId, *apv));
