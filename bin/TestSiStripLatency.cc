@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 
 using namespace std;
 
@@ -12,7 +13,7 @@ struct DetIdAndApvs
 };
 
 void test( const vector<DetIdAndApvs> & detIdAndApvs,
-           const vector<int> & latencyIndexes, vector<float> & latencies,
+           const vector<int> & latencyIndexes, vector<uint16_t> & latencies,
            const vector<int> & modeIndexes, vector<uint16_t> & modes,
            SiStripLatency & latency )
 {
@@ -63,14 +64,14 @@ void test( const vector<DetIdAndApvs> & detIdAndApvs,
   cout << "Ranges after compression = " << latenciesAfterCompression.size() << endl;
 }
 
-void check( const vector<float> & latencies, const vector<uint16_t> & modes, const vector<DetIdAndApvs> & detIdAndApvs, SiStripLatency & latency )
+void check( const vector<uint16_t> & latencies, const vector<uint16_t> & modes, const vector<DetIdAndApvs> & detIdAndApvs, SiStripLatency & latency )
 {
   if( latencies.size() != modes.size() ) {
     cout << "Error: different size for latencies = " << latencies.size() << " and modes = " << modes.size() << endl;
     exit(1);
   }
   vector<DetIdAndApvs>::const_iterator detIdAndApv = detIdAndApvs.begin();
-  vector<float>::const_iterator it = latencies.begin();
+  vector<uint16_t>::const_iterator it = latencies.begin();
   vector<uint16_t>::const_iterator modeIt = modes.begin();
   detIdAndApv = detIdAndApvs.begin();
   int latencyErrorCount = 0;
@@ -96,6 +97,20 @@ void check( const vector<float> & latencies, const vector<uint16_t> & modes, con
   cout << endl;
   cout << "Single latency value = " << latency.singleLatency() << endl;
   cout << "Single mode value = " << latency.singleMode() << endl;
+
+  ostream_iterator<uint16_t> output( cout, ", " );
+  // Print all latencies
+  vector<uint16_t> allLatenciesVector;
+  latency.allLatencies(allLatenciesVector);
+  cout << "All latencies in the Tracker = " << allLatenciesVector.size() << ", and are:" << endl;
+  copy( allLatenciesVector.begin(), allLatenciesVector.end(), output );
+  cout << endl;
+  // Print all modes
+  vector<uint16_t> allModesVector;
+  latency.allModes(allModesVector);
+  cout << "All modes in the Tracker = " << allModesVector.size() << ", and are:" << endl;
+  copy( allModesVector.begin(), allModesVector.end(), output );
+  cout << endl;
 
   cout << endl;
   cout << "Latency errors = " << latencyErrorCount << endl;
@@ -160,7 +175,7 @@ int main()
   cout << "----------------------" << endl;
   // Testing with all the same values. Expected final size of internal ranges and latencies = 1
   vector<int> latencyIndexes;
-  vector<float> latencies;
+  vector<uint16_t> latencies;
   vector<int> modeIndexes;
   vector<uint16_t> modes;
   SiStripLatency latency1;
