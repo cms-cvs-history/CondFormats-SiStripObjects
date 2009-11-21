@@ -2,3 +2,8 @@
   <use name=CondFormats/SiStripObjects>
 </bin>
 
+<bin name=TestSiStripConfObject file=TestSiStripConfObject.cc>
+  <use name=CondFormats/SiStripObjects>
+</bin>
+
+
