@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <iostream>
-#include <iterator>
 
 using namespace std;
 
@@ -13,7 +12,7 @@ struct DetIdAndApvs
 };
 
 void test( const vector<DetIdAndApvs> & detIdAndApvs,
-           const vector<int> & latencyIndexes, vector<uint16_t> & latencies,
+           const vector<int> & latencyIndexes, vector<float> & latencies,
            const vector<int> & modeIndexes, vector<uint16_t> & modes,
            SiStripLatency & latency )
 {
@@ -48,7 +47,7 @@ void test( const vector<DetIdAndApvs> & detIdAndApvs,
 
 
       // cout << "For i = " << i << " flip = " << flip << endl;
-      latency.put(detIdAndApv->detId, *apv, 14+flip, 37+modeFlip);
+      latency.put(detIdAndApv->detId, *apv, 1.3+flip, 37+modeFlip);
 
 //       cout << "latency stored is = " << latency.latency(detIdAndApv->detId, *apv) << endl;
       latencies.push_back(latency.latency(detIdAndApv->detId, *apv));
@@ -64,14 +63,14 @@ void test( const vector<DetIdAndApvs> & detIdAndApvs,
   cout << "Ranges after compression = " << latenciesAfterCompression.size() << endl;
 }
 
-void check( const vector<uint16_t> & latencies, const vector<uint16_t> & modes, const vector<DetIdAndApvs> & detIdAndApvs, SiStripLatency & latency )
+void check( const vector<float> & latencies, const vector<uint16_t> & modes, const vector<DetIdAndApvs> & detIdAndApvs, SiStripLatency & latency )
 {
   if( latencies.size() != modes.size() ) {
     cout << "Error: different size for latencies = " << latencies.size() << " and modes = " << modes.size() << endl;
     exit(1);
   }
   vector<DetIdAndApvs>::const_iterator detIdAndApv = detIdAndApvs.begin();
-  vector<uint16_t>::const_iterator it = latencies.begin();
+  vector<float>::const_iterator it = latencies.begin();
   vector<uint16_t>::const_iterator modeIt = modes.begin();
   detIdAndApv = detIdAndApvs.begin();
   int latencyErrorCount = 0;
@@ -97,20 +96,6 @@ void check( const vector<uint16_t> & latencies, const vector<uint16_t> & modes, 
   cout << endl;
   cout << "Single latency value = " << latency.singleLatency() << endl;
   cout << "Single mode value = " << latency.singleMode() << endl;
-
-  ostream_iterator<uint16_t> output( cout, ", " );
-  // Print all latencies
-  vector<uint16_t> allLatenciesVector;
-  latency.allLatencies(allLatenciesVector);
-  cout << "All latencies in the Tracker = " << allLatenciesVector.size() << ", and are:" << endl;
-  copy( allLatenciesVector.begin(), allLatenciesVector.end(), output );
-  cout << endl;
-  // Print all modes
-  vector<uint16_t> allModesVector;
-  latency.allModes(allModesVector);
-  cout << "All modes in the Tracker = " << allModesVector.size() << ", and are:" << endl;
-  copy( allModesVector.begin(), allModesVector.end(), output );
-  cout << endl;
 
   cout << endl;
   cout << "Latency errors = " << latencyErrorCount << endl;
@@ -175,7 +160,7 @@ int main()
   cout << "----------------------" << endl;
   // Testing with all the same values. Expected final size of internal ranges and latencies = 1
   vector<int> latencyIndexes;
-  vector<uint16_t> latencies;
+  vector<float> latencies;
   vector<int> modeIndexes;
   vector<uint16_t> modes;
   SiStripLatency latency1;
@@ -201,29 +186,6 @@ int main()
   cout << "Filling complete, starting check" << endl;
   cout << endl;
   check(latencies, modes, detIdAndApvs, latency2);
-
-  // Checking the method to retrieve all the unique (latencies,modes) pairs
-  // Create a latency object with three combinations of latency and mode: (14, 37), (15, 37) and (15, 47)
-  cout << "Checking the method to retrieve all the unique combinations of latency and mode" << endl;
-  SiStripLatency latency3;
-  latency3.put(1, 0, 14, 37);
-  latency3.put(2, 0, 14, 37);
-  latency3.put(3, 0, 15, 37);
-  latency3.put(4, 0, 15, 47);
-  cout << "Stored three combinations of latency and mode: (14, 37), (15, 37) and (15, 47)" << endl;
-
-  vector<SiStripLatency::Latency> uniqueLatenciesAndModes(latency3.allUniqueLatencyAndModes());
-  vector<SiStripLatency::Latency>::const_iterator it = uniqueLatenciesAndModes.begin();
-  cout << "Reading back what is returned by the allUniqueLatencyAndModes method" << endl;
-  for( ; it != uniqueLatenciesAndModes.end(); ++it ) {
-    cout << "latency = " << int(it->latency) << ", mode = " << int(it->mode) << endl;
-  }
-  if( uniqueLatenciesAndModes.size() == 3 ) {
-    cout << "Test passed" << endl;
-  }
-  else {
-    cout << "ERROR: test not passed" << endl;
-  }
 
   return 0;
 }
